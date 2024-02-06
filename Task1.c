@@ -10,10 +10,12 @@ void printBytes(void *ptr, int numBytes) {
     }
 }
 
-int main() {
-    // Example usage of printBytes
-    unsigned char someData[] = {10, 20, 30, 145};
-    printBytes(someData, 4);
+// Example usage of printBytes
+//int main() {
+    //unsigned char someData[] = {10, 20, 30, 145};
+    //printBytes(someData, 4);
 
-    return 0;
-}
+    //return 0;
+//}
+
+
