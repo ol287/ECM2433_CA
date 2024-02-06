@@ -1,22 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char *argv[]) {
-    // Check if the number of arguments is correct
-    if (argc != 3) {
-        fprintf(stderr, "Usage: %s fileIn fileOut\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
+int reverseFileContents(const char *inputFileName, const char *outputFileName) {
     // Open the input file for reading
-    FILE *fileIn = fopen(argv[1], "r");
+    FILE *fileIn = fopen(inputFileName, "r");
     if (fileIn == NULL) {
         perror("Error opening input file");
         return EXIT_FAILURE;
     }
 
     // Open the output file for writing
-    FILE *fileOut = fopen(argv[2], "w");
+    FILE *fileOut = fopen(outputFileName, "w");
     if (fileOut == NULL) {
         perror("Error opening output file");
         fclose(fileIn); // Close the input file before exiting
@@ -67,4 +61,15 @@ int main(int argc, char *argv[]) {
     fclose(fileOut);
 
     return EXIT_SUCCESS;
+}
+
+int main(int argc, char *argv[]) {
+    // Check if the number of arguments is correct
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s fileIn fileOut\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    // Call the function to reverse the contents of the file
+    return reverseFileContents(argv[1], argv[2]);
 }
