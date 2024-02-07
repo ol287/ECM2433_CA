@@ -105,29 +105,29 @@ int main() {
     msString *ms2 = msSetString(" World!");
     msString *mscopy;
 
-    // Print initial strings and lengths
-    printf("String %s is %d characters long.\n", msGetString(ms), msLength(ms));
-    printf("String %s is %d characters long.\n", msGetString(ms2), msLength(ms2));
+    // Print initial strings, lengths, and memory addresses
+    printf("String |%s| is %d characters long (0x%p).\n", msGetString(ms), msLength(ms), ms);
+    printf("String |%s| is %d characters long (0x%p).\n", msGetString(ms2), msLength(ms2), ms2);
 
     // Copy ms to mscopy
     mscopy = msSetString(""); // Initialize mscopy with an empty string
     msCopy(&mscopy, ms);
 
-    // Print the copied string and length
-    printf("Copied string %s is %d characters long.\n", msGetString(mscopy), msLength(mscopy));
+    // Print the copied string, length, and memory address
+    printf("Copied string |%s| is %d characters long (0x%p).\n", msGetString(mscopy), msLength(mscopy), mscopy);
 
-    // Compare strings
+    // Compare strings (no change needed here)
     printf("Compare ms with mscopy: %d\n", msCompare(ms, mscopy));
-    printf("Compare ms with ms2: %d\n", msCompare(ms, ms2));
-    printf("Compare ms with Hello: %d\n", msCompareString(ms, "Hello"));
-    printf("Compare ms with Hellox: %d\n", msCompareString(ms, "Hellox"));
-    printf("Compare ms with Helloa: %d\n", msCompareString(ms, "Helloa"));
+    printf("Compare ms with ms2 : %d\n", msCompare(ms, ms2));
+    printf("Compare ms with Hello : %d\n", msCompareString(ms, "Hello"));
+    printf("Compare ms with HelloX: %d\n", msCompareString(ms, "Hellox"));
+    printf("Compare ms with Hella : %d\n", msCompareString(ms, "Helloa"));
 
     // Concatenate ms2 to mscopy
     msConcatenate(&mscopy, ms2);
 
-    // Print the concatenated string and length
-    printf("Concatenated string %s is %d characters long.\n", msGetString(mscopy), msLength(mscopy));
+    // Print the concatenated string, length, and memory address
+    printf("Concatenated string |%s| is %d characters long (0x%p).\n", msGetString(mscopy), msLength(mscopy), mscopy);
 
     // Free the memory allocated for msStrings
     msFree(ms);
