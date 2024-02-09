@@ -12,7 +12,7 @@ msString *msSetString(const char *s);
 char *msGetString(const msString *ms);
 void msCopy(msString **dest, const msString *src);
 void msConcatenate(msString **dest, const msString *src);
-int msLength(const msString *ms);
+long int msLength(const msString *ms);
 int msCompare(const msString *ms1, const msString *ms2);
 int msCompareString(const msString *ms, const char *s);
 void msError(const char *s);
@@ -69,9 +69,9 @@ void msConcatenate(msString **dest, const msString *src) {
     (*dest)->length += src->length;
 }
 
-int msLength(const msString *ms) {
+long int msLength(const msString *ms) {
     if (!ms) return -1;
-    return ms->length;
+    return (long int)ms->length; 
 }
 
 int msCompare(const msString *ms1, const msString *ms2) {
