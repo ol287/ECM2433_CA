@@ -47,16 +47,35 @@ char *msGetString(const msString *ms) {
 }
 
 void msCopy(msString **dest, const msString *src) {
-    if (!dest || !src) return;
-    free((*dest)->str);
+    if (!dest || !src) return; // Check if either dest or src is NULL.
+
+    // If *dest is NULL, allocate memory for it.
+    if (!*dest) {
+        *dest = (msString *)malloc(sizeof(msString));
+        if (!*dest) {
+            msError("Memory allocation for destination failed");
+            return;
+        }
+    } else {
+        // Free the old string if it exists.
+        free((*dest)->str);
+    }
+
+    // Allocate memory for the new string.
     (*dest)->str = (char *)malloc(src->length + 1);
     if (!(*dest)->str) {
-        msError("Memory allocation failed");
+        msError("Memory allocation for string copy failed");
+        // If allocation failed, free the allocated msString before returning.
+        free(*dest);
+        *dest = NULL;
         return;
     }
+
+    // Copy the string and the length.
     strcpy((*dest)->str, src->str);
     (*dest)->length = src->length;
 }
+
 
 void msConcatenate(msString **dest, const msString *src) {
     if (!dest || !src) return;
@@ -100,34 +119,23 @@ void msFree(msString *ms) {
 }
 
 int main() {
-    // Create msStrings using the given C strings
-    msString *ms = msSetString("Hello");
+    msString *ms = msSetString(" Hello ");
     msString *ms2 = msSetString(" World!");
-    msString *mscopy;
+    msString *mscopy = NULL;
 
-    // Print initial strings, lengths, and memory addresses
-    printf("String |%s| is %d characters long (0x%p).\n", msGetString(ms), msLength(ms), ms);
-    printf("String |%s| is %d characters long (0x%p).\n", msGetString(ms2), msLength(ms2), ms2);
-
-    // Copy ms to mscopy
-    mscopy = msSetString(""); // Initialize mscopy with an empty string
+    printf("String |%s| is %ld characters long (%p).\n", msGetString(ms), msLength(ms), (void*)ms);
     msCopy(&mscopy, ms);
+    printf("Copied string |%s| is %ld characters long (%p).\n", msGetString(mscopy), msLength(mscopy), (void*)mscopy);
 
-    // Print the copied string, length, and memory address
-    printf("Copied string |%s| is %d characters long (0x%p).\n", msGetString(mscopy), msLength(mscopy), mscopy);
-
-    // Compare strings (no change needed here)
     printf("Compare ms with mscopy: %d\n", msCompare(ms, mscopy));
-    printf("Compare ms with ms2 : %d\n", msCompare(ms, ms2));
-    printf("Compare ms with Hello : %d\n", msCompareString(ms, "Hello"));
-    printf("Compare ms with HelloX: %d\n", msCompareString(ms, "Hellox"));
-    printf("Compare ms with Hella : %d\n", msCompareString(ms, "Helloa"));
+    printf("Compare ms with ms2: %d\n", msCompare(ms, ms2));
+    printf("Compare ms with Hello: %d\n", msCompareString(ms, "Hello"));
+    printf("Compare ms with HelloX: %d\n", msCompareString(ms, "HelloX"));
+    printf("Compare ms with Hella: %d\n", msCompareString(ms, "Hella"));
 
-    // Concatenate ms2 to mscopy
     msConcatenate(&mscopy, ms2);
+    printf("Concatenated string |%s| is %ld characters long", msGetString(mscopy), msLength(mscopy));
 
-    // Print the concatenated string, length, and memory address
-    printf("Concatenated string |%s| is %d characters long (0x%p).\n", msGetString(mscopy), msLength(mscopy), mscopy);
 
     // Free the memory allocated for msStrings
     msFree(ms);
