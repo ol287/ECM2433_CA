@@ -1,21 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "msString.h"
 
 typedef struct {
     int length;
     char *str;
 } msString;
-
-// Function prototypes
-msString *msSetString(const char *s);
-char *msGetString(const msString *ms);
-void msCopy(msString **dest, const msString *src);
-void msConcatenate(msString **dest, const msString *src);
-long int msLength(const msString *ms);
-int msCompare(const msString *ms1, const msString *ms2);
-int msCompareString(const msString *ms, const char *s);
-void msError(const char *s);
 
 // Function definitions
 msString *msSetString(const char *s) {
