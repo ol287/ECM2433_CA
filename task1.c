@@ -29,8 +29,10 @@ void printBytes(void *ptr, int numBytes) {
     unsigned char *bytePtr = (unsigned char *)ptr;
     printf("Starting at memory address %p:\n", ptr);
 
+    /* Declare loop variable outside the loop due to ANSI C limitations */
+    int i;
     /* Loop through each byte of memory */
-    for (int i = 0; i < numBytes; i++) {
+    for (i = 0; i < numBytes; i++) {
         printf("%03d: %d\n", i + 1, bytePtr[i]);
     }
 }
