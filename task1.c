@@ -1,39 +1,36 @@
 #include <stdio.h>
 
-//function prototype
+/* Function prototype */
 void printBytes(void *ptr, int numBytes);
 
 int main() {
-    int num = 0x12345678;
-    float fnum = 123.456f;
-    char str[] = "Hello, World!";
+    int integerVar = 0x12345678;
+    float floatVar = 123.456f;
+    char stringVar[] = "Hello, World!";
 
-    //test with an integer
+    /* Test with an integer */
     printf("Bytes of an integer:\n");
-    printBytes(&num, sizeof(num));
+    printBytes(&integerVar, sizeof(integerVar));
 
-    //test with a float
+    /* Test with a float */
     printf("\nBytes of a float:\n");
-    printBytes(&fnum, sizeof(fnum));
+    printBytes(&floatVar, sizeof(floatVar));
 
-    //test with a string
+    /* Test with a string */
     printf("\nBytes of a string:\n");
-    printBytes(str, sizeof(str) - 1); // -1 to not include the null terminator
+    printBytes(stringVar, sizeof(stringVar) - 1); /* -1 to exclude the null terminator */
 
     return 0;
 }
 
-//function that takes a void pointer and interger as parameters
+/* Function that takes a void pointer and an integer as parameters */
 void printBytes(void *ptr, int numBytes) {
-    //use char pointer to be able to access each byte of the memory
-    unsigned char *p = (unsigned char *)ptr;
+    /* Use unsigned char pointer to access each byte of memory */
+    unsigned char *bytePtr = (unsigned char *)ptr;
     printf("Starting at memory address %p:\n", ptr);
-    //loop through each byte of mmeory
+
+    /* Loop through each byte of memory */
     for (int i = 0; i < numBytes; i++) {
-        printf("%03d: %d\n", i + 1, p[i]);
+        printf("%03d: %d\n", i + 1, bytePtr[i]);
     }
 }
-
-
-
-
