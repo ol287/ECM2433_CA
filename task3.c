@@ -122,34 +122,59 @@ void msFree(msString *ms) {
 }
 
 /* Main function */
+/* Main function */
 int main() {
-    /* Create msString instances and perform operations */
+    /* Create msString instances */
     msString *ms = msSetString("Hello");
     msString *ms2 = msSetString(" World!");
     msString *mscopy = NULL;
 
-    /* Print information about msString instances */
-    printf("String |%s| is %ld characters long (%p).\n", msGetString(ms), msLength(ms), (void*)ms);
+    if (!ms || !ms2) {
+        /* Handle error if any msString wasn't created */
+        msFree(ms);
+        msFree(ms2);
+        return 1;
+    }
+
+    /* Get and print the msString details, then free the temporary string */
+    char *temp_str = msGetString(ms);
+    if (temp_str) {
+        printf("String |%s| is %ld characters long.\n", temp_str, msLength(ms));
+        free(temp_str);
+    }
 
     /* Copy msString */
     msCopy(&mscopy, ms);
-    printf("Copied string |%s| is %ld characters long (%p).\n", msGetString(mscopy), msLength(mscopy), (void*)mscopy);
+    if (mscopy) {
+        temp_str = msGetString(mscopy); /* Reuse temp_str for the new string */
+        if (temp_str) {
+            printf("Copied string |%s| is %ld characters long.\n", temp_str, msLength(mscopy));
+            free(temp_str);
+        }
+    }
 
-    /* Compare msString instances */
+    /* Perform string comparisons */
     printf("Compare ms with mscopy: %d\n", msCompare(ms, mscopy));
     printf("Compare ms with ms2: %d\n", msCompare(ms, ms2));
-    printf("Compare ms with Hello: %d\n", msCompareString(ms, "Hello"));
-    printf("Compare ms with HelloX: %d\n", msCompareString(ms, "HelloX"));
-    printf("Compare ms with Hella: %d\n", msCompareString(ms, "Hella"));
+    printf("Compare ms with 'Hello': %d\n", msCompareString(ms, "Hello"));
+    printf("Compare ms with 'HelloX': %d\n", msCompareString(ms, "HelloX"));
+    printf("Compare ms with 'Hella': %d\n", msCompareString(ms, "Hella"));
 
     /* Concatenate msString instances */
     msConcatenate(&mscopy, ms2);
-    printf("Concatenated string |%s| is %ld characters long\n", msGetString(mscopy), msLength(mscopy));
+    if (mscopy) {
+        temp_str = msGetString(mscopy); /* Reuse temp_str for the new string */
+        if (temp_str) {
+            printf("Concatenated string |%s| is %ld characters long\n", temp_str, msLength(mscopy));
+            free(temp_str);
+        }
+    }
 
-    /* Free memory */
+    /* Free memory for all msString instances */
     msFree(ms);
     msFree(ms2);
     msFree(mscopy);
 
     return 0; /* Return from main */
 }
+
