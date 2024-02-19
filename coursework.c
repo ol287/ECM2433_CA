@@ -2,15 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Function prototypes */
-void printBytes(void *ptr, int numBytes);
-int reverseFileContents(const char *inputFileName, const char *outputFileName);
-
+/* Define a structure to hold a string along with its length */
 typedef struct {
     int length;  /* Length of the string */
     char *str;   /* Pointer to the string data */
 } msString;
 
+/* Function prototypes */
 msString *msSetString(const char *s);
 char *msGetString(const msString *ms);
 void msCopy(msString **dest, const msString *src);
@@ -20,83 +18,6 @@ int msCompare(const msString *ms1, const msString *ms2);
 int msCompareString(const msString *ms, const char *s);
 void msFree(msString *ms);
 void msError(const char *s);
-
-/* Function that takes a void pointer and an integer as parameters */
-void printBytes(void *ptr, int numBytes) {
-    /* Use unsigned char pointer to access each byte of memory */
-    unsigned char *bytePtr = (unsigned char *)ptr;
-    printf("Starting at memory address %p:\n", ptr);
-
-    /* Declare loop variable outside the loop due to ANSI C limitations */
-    int i;
-    /* Loop through each byte of memory */
-    for (i = 0; i < numBytes; i++) {
-        printf("%03d: %d\n", i + 1, bytePtr[i]);
-    }
-}
-
-/* Function to reverse the contents of a file */
-int reverseFileContents(const char *inputFileName, const char *outputFileName) {
-    /* Try to open the input file */
-    FILE *fileIn = fopen(inputFileName, "r");
-    if (fileIn == NULL) {
-        perror("Error opening input file");
-        return EXIT_FAILURE; 
-    }
-
-    /* Try to open the output file */
-    FILE *fileOut = fopen(outputFileName, "w");
-    if (fileOut == NULL) {
-        perror("Error opening output file");
-        fclose(fileIn); /* close input file */
-        return EXIT_FAILURE; 
-    }
-
-    /* Move to the end of the input file so we can start reading from the back */
-    if (fseek(fileIn, 0, SEEK_END) != 0) {
-        perror("Error seeking in input file");
-        fclose(fileIn);
-        fclose(fileOut);
-        return EXIT_FAILURE;
-    }
-
-    /* Find out how big the file is, which tells us where the last character is */
-    long fileSize = ftell(fileIn);
-    if (fileSize == -1) {
-        perror("Error telling position in input file");
-        fclose(fileIn);
-        fclose(fileOut);
-        return EXIT_FAILURE;
-    }
-
-    long pos; /* Declaration moved outside the loop */
-    /* Read each character in the file starting from the last one */
-    for (pos = fileSize - 1; pos >= 0; --pos) {
-        if (fseek(fileIn, pos, SEEK_SET) != 0) {
-            perror("Error seeking in input file");
-            break;
-        }
-
-        /* Read a single character from the file */
-        int ch = fgetc(fileIn);
-        if (ch == EOF) { 
-            perror("Error reading character");
-            break;
-        }
-
-        /* Write that character into the output file */
-        if (fputc(ch, fileOut) == EOF) {
-            perror("Error writing character");
-            break;
-        }
-    }
-
-    /* Close both files */
-    fclose(fileIn);
-    fclose(fileOut);
-
-    return EXIT_SUCCESS;
-}
 
 /* Function to handle errors */
 void msError(const char *s) {
@@ -201,79 +122,31 @@ void msFree(msString *ms) {
 }
 
 /* Main function */
-int main(int argc, char *argv[]) {
-    int integerVar = 0x12345678;
-    float floatVar = 123.456f;
-    char stringVar[] = "Hello, World!";
-    
-    /* Test with an integer */
-    printf("Bytes of an integer:\n");
-    printBytes(&integerVar, sizeof(integerVar));
-    
-    /* Test with a float */
-    printf("\nBytes of a float:\n");
-    printBytes(&floatVar, sizeof(floatVar));
-    
-    /* Test with a string */
-    printf("\nBytes of a string:\n");
-    printBytes(stringVar, sizeof(stringVar) - 1); /* -1 to exclude the null terminator */
-    
-    /* Reverse contents of a file */
-    if (argc != 3) {
-        fprintf(stderr, "Usage: %s fileIn fileOut\n", argv[0]); 
-        return EXIT_FAILURE; 
-    }
-    if (reverseFileContents(argv[1], argv[2]) == EXIT_FAILURE) {
-        return EXIT_FAILURE;
-    }
-
-    /* String operations */
+int main() {
+    /* Create msString instances and perform operations */
     msString *ms = msSetString("Hello");
     msString *ms2 = msSetString(" World!");
     msString *mscopy = NULL;
 
-    if (!ms || !ms2) {
-        /* Handle error if any msString wasn't created */
-        msFree(ms);
-        msFree(ms2);
-        return EXIT_FAILURE;
-    }
-
-    /* Get and print the msString details, then free the temporary string */
-    char *temp_str = msGetString(ms);
-    if (temp_str) {
-        printf("String |%s| is %ld characters long.\n", temp_str, msLength(ms));
-        free(temp_str);
-    }
+    /* Print information about msString instances */
+    printf("String |%s| is %ld characters long (%p).\n", msGetString(ms), msLength(ms), (void*)ms);
 
     /* Copy msString */
     msCopy(&mscopy, ms);
-    if (mscopy) {
-        temp_str = msGetString(mscopy); /* Reuse temp_str for the new string */
-        if (temp_str) {
-            printf("Copied string |%s| is %ld characters long.\n", temp_str, msLength(mscopy));
-            free(temp_str);
-        }
-    }
+    printf("Copied string |%s| is %ld characters long (%p).\n", msGetString(mscopy), msLength(mscopy), (void*)mscopy);
 
-    /* Perform string comparisons */
+    /* Compare msString instances */
     printf("Compare ms with mscopy: %d\n", msCompare(ms, mscopy));
     printf("Compare ms with ms2: %d\n", msCompare(ms, ms2));
-    printf("Compare ms with 'Hello': %d\n", msCompareString(ms, "Hello"));
-    printf("Compare ms with 'HelloX': %d\n", msCompareString(ms, "HelloX"));
-    printf("Compare ms with 'Hella': %d\n", msCompareString(ms, "Hella"));
+    printf("Compare ms with Hello: %d\n", msCompareString(ms, "Hello"));
+    printf("Compare ms with HelloX: %d\n", msCompareString(ms, "HelloX"));
+    printf("Compare ms with Hella: %d\n", msCompareString(ms, "Hella"));
 
     /* Concatenate msString instances */
     msConcatenate(&mscopy, ms2);
-    if (mscopy) {
-        temp_str = msGetString(mscopy); /* Reuse temp_str for the new string */
-        if (temp_str) {
-            printf("Concatenated string |%s| is %ld characters long\n", temp_str, msLength(mscopy));
-            free(temp_str);
-        }
-    }
+    printf("Concatenated string |%s| is %ld characters long\n", msGetString(mscopy), msLength(mscopy));
 
-    /* Free memory for all msString instances */
+    /* Free memory */
     msFree(ms);
     msFree(ms2);
     msFree(mscopy);
