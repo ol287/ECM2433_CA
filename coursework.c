@@ -5,10 +5,12 @@
 /* Function prototypes */
 void printBytes(void *ptr, int numBytes);
 int reverseFileContents(const char *inputFileName, const char *outputFileName);
+
 typedef struct {
     int length;  /* Length of the string */
     char *str;   /* Pointer to the string data */
 } msString;
+
 msString *msSetString(const char *s);
 char *msGetString(const msString *ms);
 void msCopy(msString **dest, const msString *src);
@@ -46,7 +48,7 @@ int reverseFileContents(const char *inputFileName, const char *outputFileName) {
     FILE *fileOut = fopen(outputFileName, "w");
     if (fileOut == NULL) {
         perror("Error opening output file");
-        fclose(fileIn); // close input file
+        fclose(fileIn); /* close input file */
         return EXIT_FAILURE; 
     }
 
@@ -67,8 +69,9 @@ int reverseFileContents(const char *inputFileName, const char *outputFileName) {
         return EXIT_FAILURE;
     }
 
+    long pos; /* Declaration moved outside the loop */
     /* Read each character in the file starting from the last one */
-    for (long pos = fileSize - 1; pos >= 0; --pos) {
+    for (pos = fileSize - 1; pos >= 0; --pos) {
         if (fseek(fileIn, pos, SEEK_SET) != 0) {
             perror("Error seeking in input file");
             break;
