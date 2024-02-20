@@ -2,179 +2,143 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Define a structure to hold a string along with its length */
+/* Define a structure to hold a string along with its length, hidden behind the msString type */
 typedef struct {
     int length;  /* Length of the string */
     char *str;   /* Pointer to the string data */
-} msString;
+} msStringInternal;
 
-/* Function prototypes */
-msString *msSetString(const char *s);
-char *msGetString(const msString *ms);
-void msCopy(msString **dest, const msString *src);
-void msConcatenate(msString **dest, const msString *src);
-long int msLength(const msString *ms);
-int msCompare(const msString *ms1, const msString *ms2);
-int msCompareString(const msString *ms, const char *s);
-void msFree(msString *ms);
-void msError(const char *s);
+typedef void * msString;
 
-/* Function to handle errors */
-void msError(const char *s) {
+/* Function prototypes as per msString.h, adapted for the internal structure */
+msString msSetString(char *s);
+char *msGetString(msString ms);
+void msCopy(msString *dest, msString src);
+void msConcatenate(msString *dest, msString src);
+long int msLength(msString ms);
+int msCompare(msString ms1, msString ms2);
+int msCompareString(msString ms, char *s);
+static void msError(char *s);
+
+/* Error handling function */
+static void msError(char *s) {
     fprintf(stderr, "Error: %s\n", s);
     exit(1);
 }
 
-/* Function to create a new msString from a given C string */
-msString *msSetString(const char *s) {
-    msString *ms = (msString *)malloc(sizeof(msString)); /* Allocate memory for the msString structure */
-    if (ms == NULL) { /* Check if memory allocation was successful */
+/* Create a new msString */
+msString msSetString(char *s) {
+    msStringInternal *ms = (msStringInternal *)malloc(sizeof(msStringInternal));
+    if (!ms) {
         msError("Memory allocation failed");
-        return NULL;
     }
-    ms->length = (int)strlen(s); /* Determine the length of the input string */
-    ms->str = (char *)malloc(ms->length + 1); /* Allocate memory for the string data (+1 for null terminator) */
-    if (ms->str == NULL) { /* Check if memory allocation was successful */
+    ms->length = strlen(s);
+    ms->str = (char *)malloc(ms->length + 1);
+    if (!ms->str) {
         msError("Memory allocation failed");
-        free(ms); /* Free previously allocated memory for msString structure */
-        return NULL;
+        free(ms);
     }
-    strcpy(ms->str, s); /* Copy the input string into the msString data */
-    return ms; /* Return the created msString */
+    strcpy(ms->str, s);
+    return (msString)ms; // Cast to msString type
 }
 
-/* Function to get a copy of the string data from an msString */
-char *msGetString(const msString *ms) {
-    if (ms == NULL) return NULL; /* Return NULL if the input is NULL */
-    char *s = (char *)malloc(ms->length + 1); /* Allocate memory for the copy of the string data */
-    if (s == NULL) { /* Check if memory allocation was successful */
+/* Retrieve the string data */
+char *msGetString(msString ms) {
+    msStringInternal *internal = (msStringInternal *)ms;
+    if (!internal) return NULL;
+    char *copy = (char *)malloc(internal->length + 1);
+    if (!copy) {
         msError("Memory allocation failed");
-        return NULL;
     }
-    strcpy(s, ms->str); /* Copy the string data */
-    return s; /* Return the copied string */
+    strcpy(copy, internal->str);
+    return copy;
 }
 
-/* Function to get the length of an msString */
-long int msLength(const msString *ms) {
-    if (ms == NULL) return 0; /* Return 0 if the input is NULL */
-    return ms->length; /* Return the length of the msString */
+/* Copy an msString */
+void msCopy(msString *dest, msString src) {
+    if (!dest || !src) return;
+    msStringInternal *source = (msStringInternal *)src;
+    *dest = msSetString(source->str);
 }
 
-/* Function to compare two msStrings */
-int msCompare(const msString *ms1, const msString *ms2) {
-    if (ms1 == NULL || ms2 == NULL) return 1; /* Consider unequal if either is NULL */
-    return strcmp(ms1->str, ms2->str) == 0 ? 0 : 1; /* Compare the string data */
-}
-
-/* Function to compare an msString with a C string */
-int msCompareString(const msString *ms, const char *s) {
-    if (ms == NULL || s == NULL) return 1; /* Consider unequal if either is NULL */
-    return strcmp(ms->str, s) == 0 ? 0 : 1; /* Compare the string data */
-}
-
-/* Function to copy an msString */
-void msCopy(msString **dest, const msString *src) {
-    if (dest == NULL || src == NULL) return; /* Return if any input is NULL */
-
-    if (*dest == NULL) { /* If the destination is NULL, allocate memory for it */
-        *dest = (msString *)malloc(sizeof(msString));
-        if (*dest == NULL) { /* Check if memory allocation was successful */
-            msError("Memory allocation for destination failed");
-            return;
-        }
-    } else { /* If the destination already exists, free its string data */
-        free((*dest)->str);
-    }
-
-    (*dest)->str = (char *)malloc(src->length + 1); /* Allocate memory for the string data */
-    if ((*dest)->str == NULL) { /* Check if memory allocation was successful */
-        msError("Memory allocation for string copy failed");
-        free(*dest); /* Free previously allocated memory for msString structure */
-        *dest = NULL;
-        return;
-    }
-
-    strcpy((*dest)->str, src->str); /* Copy the string data */
-    (*dest)->length = src->length; /* Update the length */
-}
-
-/* Function to concatenate an msString to another msString */
-void msConcatenate(msString **dest, const msString *src) {
-    if (dest == NULL || src == NULL || *dest == NULL) return; /* Return if any input is NULL */
-
-    char *new_str = (char *)realloc((*dest)->str, (*dest)->length + src->length + 1); /* Reallocate memory for concatenated string */
-    if (new_str == NULL) { /* Check if memory reallocation was successful */
+/* Concatenate two msStrings */
+void msConcatenate(msString *dest, msString src) {
+    if (!dest || !src) return;
+    msStringInternal *destination = (msStringInternal *)*dest;
+    msStringInternal *source = (msStringInternal *)src;
+    char *newStr = (char *)realloc(destination->str, destination->length + source->length + 1);
+    if (!newStr) {
         msError("Memory reallocation failed");
-        return;
     }
-
-    (*dest)->str = new_str; /* Update the string data pointer */
-    strcat((*dest)->str, src->str); /* Concatenate the strings */
-    (*dest)->length += src->length; /* Update the length */
+    strcat(newStr, source->str);
+    destination->str = newStr;
+    destination->length += source->length;
 }
 
-/* Function to free memory occupied by an msString */
-void msFree(msString *ms) {
-    if (ms == NULL) return; /* Return if the input is NULL */
-    free(ms->str); /* Free the string data */
-    free(ms); /* Free the msString structure */
+/* Get the length of an msString */
+long int msLength(msString ms) {
+    msStringInternal *internal = (msStringInternal *)ms;
+    if (!internal) return 0;
+    return internal->length;
 }
 
-/* Main function */
-/* Main function */
+/* Compare two msStrings */
+int msCompare(msString ms1, msString ms2) {
+    msStringInternal *first = (msStringInternal *)ms1;
+    msStringInternal *second = (msStringInternal *)ms2;
+    if (!first || !second) return 1; // Consider them unequal if either is NULL
+    return strcmp(first->str, second->str) == 0 ? 0 : 1;
+}
+
+/* Compare an msString with a char* */
+int msCompareString(msString ms, char *s) {
+    msStringInternal *internal = (msStringInternal *)ms;
+    if (!internal || !s) return 1; // Consider them unequal if either is NULL
+    return strcmp(internal->str, s) == 0 ? 0 : 1;
+}
+void msFree(msString ms) {
+    if (ms) {
+        msStringInternal *internal = (msStringInternal *)ms;
+        free(internal->str); // Free the string data
+        free(internal); // Free the structure itself
+    }
+}
+
+
+/* Main function adapted for the new type definitions and function prototypes */
 int main() {
-    /* Create msString instances */
-    msString *ms = msSetString("Hello");
-    msString *ms2 = msSetString(" World!");
-    msString *mscopy = NULL;
+    msString ms = msSetString("Hello");
+    msString ms2 = msSetString(" World!");
+    msString mscopy = NULL;
 
-    if (!ms || !ms2) {
-        /* Handle error if any msString wasn't created */
-        msFree(ms);
-        msFree(ms2);
-        return 1;
-    }
+    // Displaying the original string and its length
+    char *str = msGetString(ms);
+    printf("1 String | %s | is %ld characters long.\n", str, msLength(ms));
+    free(str); // Remember to free memory allocated by msGetString
 
-    /* Get and print the msString details, then free the temporary string */
-    char *temp_str = msGetString(ms);
-    if (temp_str) {
-        printf("String |%s| is %ld characters long.\n", temp_str, msLength(ms));
-        free(temp_str);
-    }
-
-    /* Copy msString */
+    // Copying ms to mscopy and displaying
     msCopy(&mscopy, ms);
-    if (mscopy) {
-        temp_str = msGetString(mscopy); /* Reuse temp_str for the new string */
-        if (temp_str) {
-            printf("Copied string |%s| is %ld characters long.\n", temp_str, msLength(mscopy));
-            free(temp_str);
-        }
-    }
+    str = msGetString(mscopy);
+    printf("2 Copied string | %s | is %ld characters long.\n", str, msLength(mscopy));
+    free(str); // Free the string obtained from msGetString
 
-    /* Perform string comparisons */
-    printf("Compare ms with mscopy: %d\n", msCompare(ms, mscopy));
-    printf("Compare ms with ms2: %d\n", msCompare(ms, ms2));
-    printf("Compare ms with 'Hello': %d\n", msCompareString(ms, "Hello"));
-    printf("Compare ms with 'HelloX': %d\n", msCompareString(ms, "HelloX"));
-    printf("Compare ms with 'Hella': %d\n", msCompareString(ms, "Hella"));
+    // Comparisons
+    printf("3 Compare ms with mscopy: %d\n", msCompare(ms, mscopy));
+    printf("4 Compare ms with ms2: %d\n", msCompare(ms, ms2));
+    printf("5 Compare ms with Hello: %d\n", msCompareString(ms, "Hello"));
+    printf("6 Compare ms with HelloX: %d\n", msCompareString(ms, "HelloX"));
+    printf("7 Compare ms with Hella: %d\n", msCompareString(ms, "Hella"));
 
-    /* Concatenate msString instances */
+    // Concatenation and displaying the result
     msConcatenate(&mscopy, ms2);
-    if (mscopy) {
-        temp_str = msGetString(mscopy); /* Reuse temp_str for the new string */
-        if (temp_str) {
-            printf("Concatenated string |%s| is %ld characters long\n", temp_str, msLength(mscopy));
-            free(temp_str);
-        }
-    }
+    str = msGetString(mscopy);
+    printf("8 Concatenated string | %s | is %ld characters long.\n", str, msLength(mscopy));
+    free(str); // Free the concatenated string
 
-    /* Free memory for all msString instances */
+    // Freeing all msString instances
     msFree(ms);
     msFree(ms2);
     msFree(mscopy);
 
-    return 0; /* Return from main */
+    return 0;
 }
-
