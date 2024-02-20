@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "msString.h"
 
 /* Define a structure to hold a string along with its length, hidden behind the msString type */
 typedef struct {
@@ -8,17 +9,8 @@ typedef struct {
     char *str;   /* Pointer to the string data */
 } msStringInternal;
 
-typedef void * msString;
 
-/* Function prototypes as per msString.h, adapted for the internal structure */
-msString msSetString(char *s);
-char *msGetString(msString ms);
-void msCopy(msString *dest, msString src);
-void msConcatenate(msString *dest, msString src);
-long int msLength(msString ms);
-int msCompare(msString ms1, msString ms2);
-int msCompareString(msString ms, char *s);
-static void msError(char *s);
+
 
 /* Error handling function */
 static void msError(char *s) {
@@ -39,7 +31,7 @@ msString msSetString(char *s) {
         free(ms);
     }
     strcpy(ms->str, s);
-    return (msString)ms; // Cast to msString type
+    return (msString)ms; /* Cast to msString type */
 }
 
 /* Retrieve the string data */
@@ -86,21 +78,21 @@ long int msLength(msString ms) {
 int msCompare(msString ms1, msString ms2) {
     msStringInternal *first = (msStringInternal *)ms1;
     msStringInternal *second = (msStringInternal *)ms2;
-    if (!first || !second) return 1; // Consider them unequal if either is NULL
+    if (!first || !second) return 1; /* Consider them unequal if either is NULL*/
     return strcmp(first->str, second->str) == 0 ? 0 : 1;
 }
 
 /* Compare an msString with a char* */
 int msCompareString(msString ms, char *s) {
     msStringInternal *internal = (msStringInternal *)ms;
-    if (!internal || !s) return 1; // Consider them unequal if either is NULL
+    if (!internal || !s) return 1; /* Consider them unequal if either is NULL */
     return strcmp(internal->str, s) == 0 ? 0 : 1;
 }
 void msFree(msString ms) {
     if (ms) {
         msStringInternal *internal = (msStringInternal *)ms;
-        free(internal->str); // Free the string data
-        free(internal); // Free the structure itself
+        free(internal->str); /* Free the string data */
+        free(internal); /* Free the structure itself */
     }
 }
 
@@ -111,31 +103,31 @@ int main() {
     msString ms2 = msSetString(" World!");
     msString mscopy = NULL;
 
-    // Displaying the original string and its length
+    /* Displaying the original string and its length*/
     char *str = msGetString(ms);
-    printf("1 String | %s | is %ld characters long.\n", str, msLength(ms));
-    free(str); // Remember to free memory allocated by msGetString
+    printf("String | %s | is %ld characters long.\n", str, msLength(ms));
+    free(str); /* Remember to free memory allocated by msGetString*/
 
-    // Copying ms to mscopy and displaying
+    /* Copying ms to mscopy and displaying*/
     msCopy(&mscopy, ms);
     str = msGetString(mscopy);
-    printf("2 Copied string | %s | is %ld characters long.\n", str, msLength(mscopy));
-    free(str); // Free the string obtained from msGetString
+    printf("Copied string | %s | is %ld characters long.\n", str, msLength(mscopy));
+    free(str); /* Free the string obtained from msGetString*/
 
-    // Comparisons
-    printf("3 Compare ms with mscopy: %d\n", msCompare(ms, mscopy));
-    printf("4 Compare ms with ms2: %d\n", msCompare(ms, ms2));
-    printf("5 Compare ms with Hello: %d\n", msCompareString(ms, "Hello"));
-    printf("6 Compare ms with HelloX: %d\n", msCompareString(ms, "HelloX"));
-    printf("7 Compare ms with Hella: %d\n", msCompareString(ms, "Hella"));
+    /*Comparisons*/
+    printf("Compare ms with mscopy: %d\n", msCompare(ms, mscopy));
+    printf("Compare ms with ms2: %d\n", msCompare(ms, ms2));
+    printf("Compare ms with Hello: %d\n", msCompareString(ms, "Hello"));
+    printf("Compare ms with HelloX: %d\n", msCompareString(ms, "HelloX"));
+    printf("Compare ms with Hella: %d\n", msCompareString(ms, "Hella"));
 
-    // Concatenation and displaying the result
+    /* Concatenation and displaying the result */
     msConcatenate(&mscopy, ms2);
     str = msGetString(mscopy);
-    printf("8 Concatenated string | %s | is %ld characters long.\n", str, msLength(mscopy));
-    free(str); // Free the concatenated string
+    printf("Concatenated string | %s | is %ld characters long.\n", str, msLength(mscopy));
+    free(str); /* Free the concatenated string */
 
-    // Freeing all msString instances
+    /* Freeing all msString instances */
     msFree(ms);
     msFree(ms2);
     msFree(mscopy);
