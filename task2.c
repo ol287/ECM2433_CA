@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void reverseString(char *str, int length);
+
 void reverseString(char *str, int length) {
     int start = 0;
     int end = length - 1;
